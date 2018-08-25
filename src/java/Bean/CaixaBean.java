@@ -105,14 +105,19 @@ public class CaixaBean
         this.cedulas="";
         this.notasLiberadas=false;
         try {
-            this.stringToIntArray(this.getCaixa().getNotasDisponiveis(), ";");
-            this.cedulas=this.sacarValor(this.getCaixa().getCliente().getConta().getSaldo(), this.stringToIntArray(this.getCaixa().getNotasDisponiveis(), ";"), this.valorSolicitado);
-            if(this.notasLiberadas){
-                this.caixa.getCliente().getConta().setSaldo(this.caixa.getCliente().getConta().getSaldo()-this.valorSacado);
-                (new ClienteDAO()).atualizaSaldoCliente(this.caixa.getCliente());
+            float newSaldo=this.caixa.getCliente().getConta().getSaldo()-this.valorSacado;
+            if(newSaldo>=0){
+                this.stringToIntArray(this.getCaixa().getNotasDisponiveis(), ";");
+                this.cedulas=this.sacarValor(this.getCaixa().getCliente().getConta().getSaldo(), this.stringToIntArray(this.getCaixa().getNotasDisponiveis(), ";"), this.valorSolicitado);
+                if(this.notasLiberadas){
+                    this.caixa.getCliente().getConta().setSaldo(newSaldo);
+                    (new ClienteDAO()).atualizaSaldoCliente(this.caixa.getCliente());
+                }
+                else
+                    this.cedulas="";
             }
             else
-                this.cedulas="";
+                message("Não foi possível realizar o saque. Seu saldo ficará negativo;", FacesMessage.SEVERITY_WARN);
         } catch (Exception ex) {
             message("Erro ao atualizar conta do cliente:"+ex.getMessage(), FacesMessage.SEVERITY_ERROR);
         }             
